@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name="recreate_baseline"
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu-2080ti
+#SBATCH --partition=gpu-v100
 #SBATCH --nodes=1
 #SBATCH --time 0-8:00:00
 #SBATCH --ntasks=1
