@@ -11,6 +11,7 @@ build
 # Models
 *.pth
 *.pickle
+experiments
 
 # Compiled python
 *.pyc
