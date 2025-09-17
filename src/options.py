@@ -115,7 +115,7 @@ class Options(object):
                                  help='Number of training epochs')
         self.parser.add_argument('--val_interval', type=int, default=2,
                                  help='Evaluate on validation set every this many epochs. Must be >= 1.')
-        self.parser.add_argument('--optimizer', choices={"Adam", "RAdam"}, default="Adam", help="Optimizer")
+        self.parser.add_argument('--optimizer', choices={"Adam", "AdamW", "RAdam"}, default="Adam", help="Optimizer")
         self.parser.add_argument('--lr', type=float, default=1e-3,
                                  help='learning rate (default holds for batch size 64)')
         self.parser.add_argument('--lr_step', type=str, default='1000000',
