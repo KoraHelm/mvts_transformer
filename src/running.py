@@ -46,7 +46,7 @@ def pipeline_factory(config):
     if (task == "classification") or (task == "regression"):
         return ClassiregressionDataset, collate_superv, SupervisedRunner
     else:
-        raise NotImplementedError("Task '{}' not implemented".format(task))
+        raise NotImplementedError(f"Task '{task}' not implemented")
 
 
 def setup(args):
@@ -63,7 +63,7 @@ def setup(args):
         logger.info("Reading configuration ...")
         try:  # dictionary containing the entire configuration settings in a hierarchical fashion
             config.update(utils.load_config(args.config_filepath))
-        except:
+        except Exception:
             logger.critical("Failed to load configuration file. Check JSON syntax and verify that files exist")
             traceback.print_exc()
             sys.exit(1)
@@ -73,7 +73,7 @@ def setup(args):
     output_dir = config['output_dir']
     if not os.path.isdir(output_dir):
         raise IOError(
-            "Root directory '{}', where the directory of the experiment will be created, must exist".format(output_dir))
+            f"Root directory '{output_dir}', where the directory of the experiment will be created, must exist")
 
     output_dir = os.path.join(output_dir, config['experiment_name'])
 
@@ -92,7 +92,7 @@ def setup(args):
     with open(os.path.join(output_dir, 'configuration.json'), 'w') as fp:
         json.dump(config, fp, indent=4, sort_keys=True)
 
-    logger.info("Stored configuration file in '{}'".format(output_dir))
+    logger.info(f"Stored configuration file in '{output_dir}'")
 
     return config
 
@@ -353,10 +353,10 @@ class UnsupervisedRunner(BaseRunner):
             mean_loss = batch_loss / len(loss)  # mean loss (over active elements) used for optimization the batch
 
             if keep_all:
-                per_batch['target_masks'].append(target_masks.cpu().numpy())
-                per_batch['targets'].append(targets.cpu().numpy())
-                per_batch['predictions'].append(predictions.cpu().numpy())
-                per_batch['metrics'].append([loss.cpu().numpy()])
+                per_batch['target_masks'].append(target_masks.cpu().detach().numpy())
+                per_batch['targets'].append(targets.cpu().detach().numpy())
+                per_batch['predictions'].append(predictions.cpu().detach().numpy())
+                per_batch['metrics'].append([loss.cpu().detach().numpy()])
                 per_batch['IDs'].append(IDs)
 
             metrics = {"loss": mean_loss}
@@ -455,9 +455,9 @@ class SupervisedRunner(BaseRunner):
             batch_loss = torch.sum(loss).cpu().item()
             mean_loss = batch_loss / len(loss)  # mean loss (over samples)
 
-            per_batch['targets'].append(targets.cpu().numpy())
-            per_batch['predictions'].append(predictions.cpu().numpy())
-            per_batch['metrics'].append([loss.cpu().numpy()])
+            per_batch['targets'].append(targets.cpu().detach().numpy())
+            per_batch['predictions'].append(predictions.cpu().detach().numpy())
+            per_batch['metrics'].append([loss.cpu().detach().numpy()])
             per_batch['IDs'].append(IDs)
 
             metrics = {"loss": mean_loss}
@@ -475,8 +475,8 @@ class SupervisedRunner(BaseRunner):
         if self.classification:
             predictions = torch.from_numpy(np.concatenate(per_batch['predictions'], axis=0))
             probs = torch.nn.functional.softmax(predictions)  # (total_samples, num_classes) est. prob. for each class and sample
-            predictions = torch.argmax(probs, dim=1).cpu().numpy()  # (total_samples,) int class index for each sample
-            probs = probs.cpu().numpy()
+            predictions = torch.argmax(probs, dim=1).cpu().detach().numpy()  # (total_samples,) int class index for each sample
+            probs = probs.cpu().detach().numpy()
             targets = np.concatenate(per_batch['targets'], axis=0).flatten()
             class_names = np.arange(probs.shape[1])  # TODO: temporary until I decide how to pass class names
             metrics_dict = self.analyzer.analyze_classification(predictions, targets, class_names)
